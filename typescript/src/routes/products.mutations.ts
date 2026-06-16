@@ -30,8 +30,24 @@ async function deleteProduct(req: AuthRequest, res: Response): Promise<Response>
   return deleted ? res.json({ message: 'Product deleted' }) : res.status(404).json({ message: 'Product not found' });
 }
 
+async function updateStock(req: AuthRequest, res: Response): Promise<Response> {
+  const stock = Number((req.body as Record<string, unknown>).stock);
+  if (!Number.isInteger(stock) || stock < 0) {
+    return res.status(400).json({ message: 'Validation failed', errors: { stock: 'Stock must be a non-negative integer.' } });
+  }
+
+  const product = await Product.findByIdAndUpdate(
+    req.params.id,
+    { stock },
+    { new: true }
+  ).lean() as unknown as IProductDoc | null;
+
+  return product ? res.json(formatProduct(product)) : res.status(404).json({ message: 'Product not found' });
+}
+
 router.post('/', authenticate, createProduct);
 router.put('/:id', authenticate, updateProduct);
+router.patch('/:id/stock', authenticate, updateStock);
 router.delete('/:id', authenticate, deleteProduct);
 
 export default router;

@@ -48,6 +48,19 @@ export function checkCategory(cat: unknown): string | null {
   return null;
 }
 
+export function checkStock(stock: unknown): string | null {
+  if (stock === undefined || stock === null) {
+    return null;
+  }
+
+  const sNum = Number(stock);
+  if (!Number.isInteger(sNum) || sNum < 0) {
+    return 'Stock must be a non-negative integer.';
+  }
+
+  return null;
+}
+
 export function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -82,6 +95,11 @@ export function validateProductInput(body: Record<string, unknown>, isUpdate: bo
   if (!isUpdate || body.category !== undefined) {
     const err = checkCategory(body.category);
     if (err) errors.category = err;
+  }
+
+  if (!isUpdate || body.stock !== undefined) {
+    const err = checkStock(body.stock);
+    if (err) errors.stock = err;
   }
 
   return errors;
